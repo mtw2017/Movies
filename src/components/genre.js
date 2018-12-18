@@ -1,7 +1,7 @@
 export const genres = [
   { _id: "23oi3o2ij2i32oi3", name: "Action" },
-  { _id: "23oi2o3i23ok2o3k", name: "Comedy" },
-  { _id: "23oi2o32i4ok2o3k", name: "Drama" }
+  { _id: "16y231we23123r", name: "Comedy" },
+  { _id: "1231231we23123", name: "Literal" }
 ];
 
 export function getGenres() {
