@@ -46,7 +46,7 @@ const movies = [
     _id: "123t4we424t23",
     title: "Big Bang",
     genre: { _id: "16y231we23123r", name: "Comedy" },
-    numberInStock: "$9",
+    numberInStock: "9",
     dailyRentalPrice: 1.5,
     publishDate: "2018-11-03T19:04:28.809Z"
   }
