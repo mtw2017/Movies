@@ -1,9 +1,10 @@
 import React, { Component } from "react";
-import { getMovies, deleteMovie } from "./movie";
+import { getMovies, deleteMovie } from "../services/movieService";
+import { toast } from "react-toastify";
 import Pagenation from "./common/pagenation";
 import { paginate } from "../utils/paginate";
 import ListGroup from "./common/listGroup";
-import { getGenres } from "./genre";
+import { getGenres } from "../services/genreService";
 import MoviesTable from "./moviesTable";
 import { Link } from "react-router-dom";
 import _ from "lodash";
@@ -21,19 +22,28 @@ class Movies extends Component {
     currentPage: 1
   };
 
-  componentDidMount() {
-    const genres = [{ _id: "", name: "All Genres" }, ...getGenres()];
-    this.setState({ movies: getMovies(), genres });
+  async componentDidMount() {
+    const { data } = await getGenres();
+    const { data: movies } = await getMovies();
+    const genres = [{ _id: "", name: "All Genres" }, ...data];
+    this.setState({ movies, genres });
   }
 
   handleSort = sortColumn => {
     this.setState({ sortColumn });
   };
 
-  handleDelete = movie => {
-    const movies = this.state.movies.filter(m => m._id !== movie._id);
+  handleDelete = async movie => {
+    const originalMovies = this.state.movies;
+    const movies = originalMovies.filter(m => m._id !== movie._id);
     this.setState({ movies });
-    deleteMovie(movie._id);
+    try {
+      await deleteMovie(movie._id);
+    } catch (ex) {
+      if (ex.response && ex.response.status === 404)
+        toast.error("This movie has already been deleted.");
+      this.setState({ movies: originalMovies });
+    }
   };
 
   handleLike = movie => {
@@ -84,6 +94,7 @@ class Movies extends Component {
   render() {
     const { length: count } = this.state.movies;
     const { pageSize, currentPage, sortColumn, searchQuery } = this.state;
+    const { user } = this.props;
 
     if (count === 0) return <p>There are no movies in the database.</p>;
 
@@ -99,9 +110,11 @@ class Movies extends Component {
           />
         </div>
         <div className="col">
-          <Link to="/movies/new" className="btn btn-primary">
-            New Movie
-          </Link>
+          {user && user.isAdmin && (
+            <Link to="/movies/new" className="btn btn-primary">
+              New Movie
+            </Link>
+          )}
           <SearchBox value={searchQuery} onChange={this.handelSearch} />
           <p>There are {totalCount} movies in the database.</p>
           <MoviesTable

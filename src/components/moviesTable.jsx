@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import Like from "./common/like";
 import Table from "./common/table";
+import auth from "../services/authService";
 
 class MoviesTable extends Component {
   columns = [
@@ -12,25 +13,39 @@ class MoviesTable extends Component {
     },
     { path: "genre.name", label: "Genre" },
     { path: "numberInStock", label: "Stock" },
-    { path: "dailyRentalPrice", label: "Price" },
-    {
-      key: "like",
-      content: movie => (
-        <Like onClick={() => this.props.onLike(movie)} liked={movie.liked} />
-      )
-    },
-    {
-      key: "delete",
-      content: movie => (
-        <button
-          onClick={() => this.props.onDelete(movie)}
-          className="btn btn-danger btn-sm"
-        >
-          Delete
-        </button>
-      )
-    }
+    { path: "dailyRentalRate", label: "Rate" }
   ];
+
+  adminColumn = {
+    key: "delete",
+    content: movie => (
+      <button
+        onClick={() => this.props.onDelete(movie)}
+        className="btn btn-danger btn-sm"
+      >
+        Delete
+      </button>
+    )
+  };
+
+  userColumn = {
+    key: "like",
+    label: "Like",
+    content: movie => (
+      <Like onClick={() => this.props.onLike(movie)} liked={movie.liked} />
+    )
+  };
+
+  constructor() {
+    super();
+    const user = auth.getCurrentUser();
+    if (user) {
+      this.columns.push(this.userColumn);
+      if (user.isAdmin) {
+        this.columns.push(this.adminColumn);
+      }
+    }
+  }
 
   render() {
     const { movies, onSort, sortColumn } = this.props;
